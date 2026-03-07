@@ -12,7 +12,6 @@ TOMATO="\033[38;2;255;99;71m"
 NC="\033[0m"
 
 ARCH=${ARCH:-x86_64}
-ROOTFS_DIR="pasta"
 
 ## map arch to Alpine minirootfs URL and QEMU binary name
 case "${ARCH}" in
@@ -46,9 +45,9 @@ TARBALL="${ALPINE_URL##*/}"
 
 ## unmount bind mounts on exit to avoid leaking mounts on failure
 cleanup() {
-  sudo umount -lf "${ROOTFS_DIR}/proc" 2>/dev/null || true
-  sudo umount -lf "${ROOTFS_DIR}/dev"  2>/dev/null || true
-  sudo umount -lf "${ROOTFS_DIR}/sys"  2>/dev/null || true
+  sudo umount -lf "pasta/proc" 2>/dev/null || true
+  sudo umount -lf "pasta/dev"  2>/dev/null || true
+  sudo umount -lf "pasta/sys"  2>/dev/null || true
 }
 trap cleanup EXIT
 
@@ -72,23 +71,23 @@ echo -e "${HELIOTROPE}= download alpine rootfs${NC}"
 wget -c "${ALPINE_URL}"
 
 echo -e "${MINT}= extract rootfs${NC}"
-mkdir -p "${ROOTFS_DIR}"
-tar xf "${TARBALL}" -C "${ROOTFS_DIR}/"
+mkdir -p pasta
+tar xf "${TARBALL}" -C pasta/
 
 echo -e "${TOMATO}= copy resolv.conf into the folder${NC}"
-cp /etc/resolv.conf "./${ROOTFS_DIR}/etc/"
+cp /etc/resolv.conf ./pasta/etc/
 
 if [ -n "${QEMU_ARCH}" ]; then
   echo -e "${TAWNY}= setup QEMU for cross-arch builds${NC}"
-  sudo mkdir -p "./${ROOTFS_DIR}/usr/bin/"
-  sudo cp "/usr/bin/qemu-${QEMU_ARCH}-static" "./${ROOTFS_DIR}/usr/bin/"
+  sudo mkdir -p ./pasta/usr/bin/
+  sudo cp "/usr/bin/qemu-${QEMU_ARCH}-static" "./pasta/usr/bin/"
 fi
 
 echo -e "${VIOLET}= mount, bind and chroot into dir${NC}"
-sudo mount -t proc none "./${ROOTFS_DIR}/proc/"
-sudo mount --rbind /dev "./${ROOTFS_DIR}/dev/"
-sudo mount --rbind /sys "./${ROOTFS_DIR}/sys/"
-sudo chroot "./${ROOTFS_DIR}/" /bin/sh -c "apk update && apk add build-base \
+sudo mount -t proc none ./pasta/proc/
+sudo mount --rbind /dev ./pasta/dev/
+sudo mount --rbind /sys ./pasta/sys/
+sudo chroot ./pasta/ /bin/sh -c "apk update && apk add build-base \
 musl-dev \
 openssl-dev \
 zlib-dev \
@@ -128,6 +127,6 @@ make -j\$(nproc) && \
 strip src/aria2c && \
 upx --ultra-brute src/aria2c"
 mkdir -p dist
-cp "./${ROOTFS_DIR}/aria2-${ARIA2_VERSION}/src/aria2c" "dist/aria2c-${ARCH}"
+cp "./pasta/aria2-${ARIA2_VERSION}/src/aria2c" "dist/aria2c-${ARCH}"
 tar -C dist -cJf "dist/aria2c-${ARCH}.tar.xz" "aria2c-${ARCH}"
 echo -e "${LEMON}= All done! Binary: dist/aria2c-${ARCH} ($(du -sh "dist/aria2c-${ARCH}" | cut -f1))${NC}"
