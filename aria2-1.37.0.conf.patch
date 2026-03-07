@@ -627,3 +627,17 @@ index 07502c0..e6da18f 100644
                 (ipv6 ? "/aria2/dht6.dat" : "/aria2/dht.dat");
    }
    return filename;
+diff --git a/src/Platform.cc b/src/Platform.cc
+--- a/src/Platform.cc
++++ b/src/Platform.cc
+@@ -122,7 +122,9 @@ bool Platform::setUp()
+   // RC4 is in the legacy provider.
+   legacy_provider_ = OSSL_PROVIDER_load(nullptr, "legacy");
+   if (!legacy_provider_) {
+-    throw DL_ABORT_EX("OSSL_PROVIDER_load 'legacy' failed.");
++    // Legacy provider (.so) cannot be loaded in a fully static binary.
++    // Modern TLS via the default provider is still available.
++    ERR_clear_error();
+   }
+ 
+   default_provider_ = OSSL_PROVIDER_load(nullptr, "default");
