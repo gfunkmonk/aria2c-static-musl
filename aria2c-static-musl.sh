@@ -100,7 +100,6 @@ libssh2-dev \
 libssh2-static \
 sqlite-static \
 lz4-static \
-c-ares-static \
 libgpg-error-dev \
 libgpg-error-static \
 perl && curl -L -O 'https://github.com/aria2/aria2/releases/download/release-1.37.0/aria2-1.37.0.tar.gz' && \
