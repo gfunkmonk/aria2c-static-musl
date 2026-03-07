@@ -1,6 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
+ORANGE="\033[38;2;255;165;0m"
 LEMON="\033[38;2;255;244;79m"
 TAWNY="\033[38;2;204;78;0m"
 HELIOTROPE="\033[38;2;223;115;255m"
